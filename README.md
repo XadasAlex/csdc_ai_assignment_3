@@ -476,3 +476,119 @@ Furthermore, it can be observed that increasing the learning rate results in con
 The validation loss is always lower than the training loss, indicating no overfitting.
 
 Therefore, it is clear that the momentum term improves optimization and allows for the efficient and stable use of higher learning rates.
+
+### Task 5: Dropout Layer (Regularization)
+
+1. effects of introducing dropout layers (particularly between convolutional layers)
+
+To analyze the effect of dropout, we trained the same CNN topology both with and without dropout layers.
+
+Dropout was inserted between convolutional blocks (after max pooling layers) with a value of '0.3'.
+
+The experiments were made with 5 epochs and 20 epochs.
+
+5 epochs:
+
+![[Task5_WithoutDropoutsLoss_1_loss.png]]
+
+![[Task5_DropoutsLoss_1_loss.png]]
+
+20 epochs:
+
+![[Task5_WithoutDropoutsLoss_2_loss.png]]
+
+![[Task5_DropoutsLoss_2_loss.png]]
+
+In the short training run (5 epochs), training and validation loss decreased simultaneously and remained close to each other, indicating no immediate overfitting. In this scenario, the effect of dropout is not yet clearly visible.
+
+When extending the training to 20 epochs, the model without dropout shows a continuously decreasing training loss, while the validation loss stagnates and exhibits small changes. This behavior indicates overfitting, as the model increasingly memorizes the training data without improving its generalization capability.
+
+With dropout enabled, the training loss remains higher due to the random deactivation of feature maps during training. However, the validation loss decreases more smoothly and remains stable over the entire training process. Thats a good indication for generalization and for reduced overfitting.
+
+2. insert a dropout layer at appropriate position between instructions that compose the current topology
+
+Dropout layers were inserted after the max pooling layers between convolutional blocks. This position was chosen to regularize feature maps while preserving essential spatial information extracted by the convolutional layers.
+
+3. vary the dropout rate between [0.2,0.5] for all introduced dropout layers (evaluate min. 4 values)
+
+Prepare list of dropouts and the build_model function:
+
+```python
+def build_model(dropout_rate=0.3):
+    ...
+    # layer 1
+    model.add(Conv2D(planes, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(dropout_rate))    #dropout
+    # layer 2
+    model.add(Conv2D(planes * 2, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(dropout_rate))    #dropout
+	...
+
+dropout_rates = [0.2, 0.3, 0.4, 0.5]
+```
+
+4. change the name of the model in the model_name variable to identify the output files for model loss function, accuracy, and classification report
+
+```python
+dropout_rates = [0.2, 0.3, 0.4, 0.5]
+
+for dr in dropout_rates:
+	...
+    model = build_model(dropout_rate=dr)
+    model_name = f'Task5_DR{dr}'
+	...
+```
+
+5. analyse the loss function for both training and validation data for each dropout layer insertion and dropout rate
+
+Dropout rate = 0.2
+
+![[Task5_DR0.2_loss.png]]
+
+Dropout rate = 0.3
+
+![[Task5_DR0.3_loss.png]]
+
+Dropout rate = 0.4
+
+![[Task5_DR0.4_loss.png]]
+
+Dropout rate = 0.5
+
+![[Task5_DR0.5_loss.png]]
+
+For each evaluated dropout rate, the training and validation loss curves were plotted and analyzed. The loss curves show a monotonic decrease of both training and validation loss across all epochs for each configuration. The training loss decreases faster in the early epochs, while the validation loss follows a similar trend and stabilizes towards the end of training.
+
+6. note observations in the report together with the figures of the loss functions
+
+Lower dropout rates lead to faster convergence and lower training loss, but show slightly larger gaps between training and validation loss. Higher dropout rates increase training loss and slow down convergence, indicating stronger regularization.
+
+### Task 6: Final accuracy evaluation
+
+1. evaluate the accuracy report and the confusion matrix of the test data classified using the best model
+
+Confusion Matrix:
+
+![[best_model_confusion_matrix.png]]
+
+Accuracy report:
+
+              precision    recall  f1-score   support
+
+           0     0.9909    0.9949    0.9929       980
+           1     0.9982    0.9938    0.9960      1135
+           2     0.9923    0.9961    0.9942      1032
+           3     0.9941    0.9960    0.9951      1010
+           4     0.9969    0.9878    0.9923       982
+           5     0.9899    0.9877    0.9888       892
+           6     0.9885    0.9896    0.9890       958
+           7     0.9941    0.9883    0.9912      1028
+           8     0.9877    0.9887    0.9882       974
+           9     0.9833    0.9931    0.9882      1009
+
+    accuracy                         0.9917     10000
+   	macro avg    0.9916    0.9916    0.9916     10000
+	weighted avg 0.9917    0.9917    0.9917     10000
+
