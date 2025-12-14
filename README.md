@@ -1,3 +1,4 @@
+Group members: Alexander Gebhart, Sebastian Pfeiffer, Filip Lukic
 
 ### Task 1: Topology
 
@@ -307,3 +308,171 @@ Based on the comparative analysis, a constant learning rate of **0.01** is the o
 # NOTE THAT I EXPORTED A PDF FILE THAT CONTAINS OTHER SCREEN SHOTS FOR DOCUMENTATION PURPOSES - I DIDNT WANT TO ADD SCREENSHOTS TO THE REPO FOR THAT PURPOSE.
 # aissngment3.ods contains the spreadsheet
 
+### Task 3: Learning Rate Schedules
+
+1. reflect on the function of the learning rate as parameter for optimization algorithms and how alternative learning rate schedules effect the optimization
+
+When an optimization algorithm adjusts the weights, it needs a step size to determine the weight change. This step size is determined by the learning rate and significantly impacts the speed and stability of the optimization.
+
+If the learning rate is too low, progress is slow, if it is too high, it leads to instability (oscillation and divergence are possible).
+
+When using learning rate schedules, the learning rate changes during training. It typically starts with high values ​​to accelerate progress. The values ​​then gradually decrease, making the optimization increasingly stable as it approaches the ideal weight.
+
+Learning rate schedules thus serve to accelerate and stabilize the training.
+
+2. use the Stochastic-Gradient-Descent (SGD) algorithm as optimizer
+
+See task 2.2.
+
+3. replace the original constant learning rate by a learning rate schedule
+
+This has library has to be imported:
+
+```python
+from tensorflow.keras.optimizers.schedules import ExponentialDecay
+```
+
+Now, the learning rate schedule can be defined and used:
+
+```python
+learning_rate = ExponentialDecay(initial_learning_rate=1e-2,
+								 decay_steps=n_epochs,
+								 decay_rate=0.9)
+
+optimizer = SGD(learning_rate=learning_rate)
+```
+
+4. change the name of the model in the model_name variable to identify the output files for
+model loss function, accuracy, and classification report
+
+See task 2.4.
+
+5. analyse the loss function for both training and validation data for each learning rate
+
+With the initial learning rate of 1e-2 specified in the task description, the following result is achieved:
+
+[Task3_initLR_1e2_loss.png]
+
+| Training Loss | Val Loss | Val Acc |
+| -------- | -------- | -------- |
+| 2.2573 | 2.2430 | 0.2567 |
+
+As can be seen, the training loss only decreases after the first epoch, the loss value then remains consistently high. The model is therefore barely learning.
+
+The validation loss also hardly changes, but is significantly lower than the training loss.
+
+The reason for this stagnation is that an initial learning rate of 1e-2 is too high to achieve any significant optimization within five epochs.
+
+6. extend the experimental scope by varying the initial learning rate between [0.001,0.1] and
+the type of schedule (evaluate min. 4 values)
+
+The following learning rates are used:
+- 0.001
+- 0.003
+- 0.05
+- 0.1
+
+The following schedule types are used:
+- Exponential Decay
+- Inverse Time Decay
+	- requires
+	  ```python
+	  from tensorflow.keras.optimizers.schedules import InverseTimeDecay
+	  ```
+
+For the "exponential decay" type, this code is used:
+
+```python
+learning_rate = ExponentialDecay(initial_learning_rate=0.001,
+ 								 decay_steps=n_epochs,
+								 decay_rate=0.9)
+```
+
+For the "inverse time decay" type, this code is used:
+
+```python
+learning_rate = InverseTimeDecay(initial_learning_rate=0.001,
+ 								 decay_steps=n_epochs,
+								 decay_rate=0.9)
+```
+
+7. note observations in the report together with the figures of the loss functions
+
+| Initial LR | Type | Training Loss | Val Loss | Val Acc |
+| ------- | ---------------- | -------- | -------- | -------- |
+| 0.001 | Exponential Decay | 2.2972 | 2.2894 | 0.0712 |
+| 0.001 | Inverse Time Decay | 2.2848 | 2.2811 | 0.1005 |
+| 0.003 | Exponential Decay | 2.2895 | 2.2862 | 0.1600 |
+| 0.003 | Inverse Time Decay | 2.2971 | 2.2974 | 0.1258 |
+| 0.05 | Exponential Decay | 1.7250 | 1.6385 | 0.6892 |
+| 0.05 | Inverse Time Decay | 1.9169 | 1.8354 | 0.6517 |
+| 0.1 | Exponential Decay | 0.6364 | 0.4136 | 0.8955 |
+| 0.1 | Inverse Time Decay | 1.0121 | 0.7662 |  0.8405 |
+
+[ Alle Bilder vom Task3 Ordner ]
+
+The results show that low learning rates (0.01 and 0.003) result in nearly constant loss functions. The model therefore learns very little, regardless of the schedule type.
+
+At higher learning rates (0.05 and 0.1), the exponential decay schedule type achieves the best results. The inverse time decay schedule type, on the other hand, results in stable but slower learning behavior.
+
+This demonstrates that both the chosen learning rate and the schedule type used have a significant impact on the loss function.
+
+### Task 4: Optimizers
+
+1. reflect on the function of the momentum term if applied to the Stochastic-Gradient-Descent
+(SGD) algorithm
+
+When using the momentum term, previous weight shifts are also considered to determine the direction of movement.
+
+The goal is to stabilize the training by reducing strong oscillation of weights.
+
+One can visualize it like this:
+
+Someone is on a hill (a high point on the loss function) and they want to descend into the valley (the desired ideal value). Before each step, they ask themselves: "Does it feel like I should go left or right?" Without the momentum term, they ignore all previous steps and move in the direction that seems most appropriate based on their current position. With the term, however, they also consider previous steps and say, for example: "If I've already taken five steps to the left and now right feels better, I'll maintain my current direction for now and then see what happens." This way, they don't constantly switch back and forth between left and right, and their direction of movement remains more consistent.
+
+The momentum term therefore improves both the stability and the speed of the training.
+
+2. enhance the Stochastic-Gradient-Descent (SGD) algorithm with the momentum term
+
+```python
+learning_rate=0.001
+momentum=0.9
+optimizer = SGD(learning_rate=learning_rate, momentum=momentum)
+model.compile(loss='categorical_crossentropy', metrics=['accuracy'], optimizer=optimizer)
+```
+
+3. change the name of the model in the model_name variable to identify the output files for
+model loss function, accuracy, and classification report
+
+See task 2.4.
+
+4. vary the learning rate between [0.001,0.01] (evaluate min. 4 values)
+
+The following learning rates are used:
+- 0.001
+- 0.003
+- 0.007
+- 0.01
+
+5. analyse the loss function for both training and validation data for each learning rate
+
+The following table shows the results:
+
+| LR | Training Loss | Val Loss | Val Acc |
+| ------- | -------- | -------- | -------- |
+| 0.001 | 0.2094 | 0.1228 | 0.9663 |
+| 0.003 | 0.1151 | 0.0686 | 0.9805 |
+| 0.007 | 0.0771 | 0.0571 | 0.9832
+| 0.01 | 0.0655 | 0.0493 | 0.9870 |
+
+[ alle Bilder vom Task4 Ordner ]
+
+6. note observations in the report together with the figures of the loss functions
+
+It can be seen that using the momentum term leads to faster and more stable convergence. Loss decreases significantly within just a few epochs.
+
+Furthermore, it can be observed that increasing the learning rate results in continuously improving performance. No instabilities occur, thus, momentum has a stabilizing effect.
+
+The validation loss is always lower than the training loss, indicating no overfitting.
+
+Therefore, it is clear that the momentum term improves optimization and allows for the efficient and stable use of higher learning rates.
